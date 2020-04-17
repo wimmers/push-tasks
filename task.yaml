@@ -1,0 +1,22 @@
+Prover: Isabelle
+
+Task Definition:
+  Name: "[Test course] Homework 12"
+  Description: |
+    This is the task corresponding to
+    homework 12.
+  Allow Sorry: true
+
+Task:
+  Contest: Test2
+  Definition: <inferred>
+  Name: Homework 12
+  Position: 121
+
+Task Resource:
+  Task: <inferred>
+  Image: HOL-IMP
+  Version: 2019
+  ITP: I19
+  Timeout socket: 20.0
+  Timeout all: 120
