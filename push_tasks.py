@@ -1,4 +1,5 @@
 import requests
+import json
 import yaml
 import sys
 import argparse
@@ -82,24 +83,29 @@ def do_path(url, endpoint, token, path):
     data = load_path(path)
     r = send_request(url, endpoint, token, data)
 
-    reply = r.json()
-    if r.status_code == 400:
-        print(
-            f"A known error was reported by the server: {reply['message']}", file=sys.stderr)
-        print(reply['exception'], file=sys.stderr)
-        sys.exit(-4)
-    elif r.status_code == 500:
-        print(
-            f"An internal error was reported by the server: {reply['message']}", file=sys.stderr)
-        print(reply['exception'], file=sys.stderr)
-        sys.exit(-5)
-    elif r.status_code == 200:
-        if reply['message'] == "success":
-            return data['Task']['Name'], reply.get('submission_id')
+    try:
+        reply = r.json()
+        if r.status_code == 400:
+            print(
+                f"A known error was reported by the server: {reply['message']}", file=sys.stderr)
+            print(reply['exception'], file=sys.stderr)
+            sys.exit(-4)
+        elif r.status_code == 500:
+            print(
+                f"An internal error was reported by the server: {reply['message']}", file=sys.stderr)
+            print(reply['exception'], file=sys.stderr)
+            sys.exit(-5)
+        elif r.status_code == 200:
+            if reply['message'] == "success":
+                return data['Task']['Name'], reply.get('submission_id')
+            else:
+                raise ValueError("Unexpected status message!")
         else:
-            raise ValueError("Unexpected status message!")
-    else:
-        raise ValueError("Unexpected status code!")
+            raise ValueError("Unexpected status code!")
+    except json.decoder.JSONDecodeError as e:
+        print(f"Unexpected server reply! Status code: {r.status_code}", file=sys.stderr)
+        print(r.text, file=sys.stderr)
+        sys.exit(-1)
 
 
 def scan_and_push(url, endpoint, token, path):
