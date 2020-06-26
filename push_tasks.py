@@ -34,14 +34,24 @@ coq_file_types = {
     "Make file": "Makefile",
 }
 
+lean_file_types = {
+    "Definitions file": "defs.lean",
+    "Template file": "template.lean",
+    "Private check file": "check.lean",
+    "Public check file": "check.lean",
+    "Make file": None,
+}
+
 file_types = {
     "Isabelle": isabelle_file_types,
-    "Coq": coq_file_types
+    "Coq": coq_file_types,
+    "Lean": lean_file_types
 }
 
 submission_files = {
     "Isabelle": 'Submission.thy',
-    "Coq": "Submission.v"
+    "Coq": "Submission.v",
+    "Lean": "submission.lean"
 }
 
 
