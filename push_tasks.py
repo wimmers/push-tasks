@@ -49,7 +49,8 @@ def collect_files(path, prover, data):
     files = [f for f in listdir(path) if isfile(join(path, f))]
     for name, file in file_types[prover].items():
         if file in files:
-            with open(join(path, file)) as f:
+            file_path = join(path, file)
+            with open(file_path) as f:
                 data[name] = f.read()
         else:
             data[name] = ""
@@ -64,7 +65,7 @@ def add_submission(path, prover, data):
 
 def load_files(data, path):
     prover = data['Prover']
-    collect_files(path, prover, data['Task Resource'])
+    collect_files(path, prover, data.get('Task Resource', {}))
     add_submission(path, prover, data)
 
 
@@ -97,13 +98,23 @@ def do_path(url, endpoint, token, path):
             sys.exit(-5)
         elif r.status_code == 200:
             if reply['message'] == "success":
-                return data['Task']['Name'], reply.get('submission_id')
+                name = None
+                if 'Task' in data:
+                    name = data['Task'].get('Name')
+                if not name and 'Task Definition' in data:
+                    name = data['Task Definition'].get('Name')
+                return name, reply.get('submission_id')
             else:
                 raise ValueError("Unexpected status message!")
+        elif r.status_code == 401 and reply['detail'] == "Invalid token.":
+            print(f"The access token is invalid.", file=sys.stderr)
+            sys.exit(-4)
         else:
-            raise ValueError("Unexpected status code!")
+            raise ValueError(
+                "Unexpected status code: {r.status_code}. Error info: {r.text}")
     except json.decoder.JSONDecodeError as e:
-        print(f"Unexpected server reply! Status code: {r.status_code}", file=sys.stderr)
+        print(
+            f"Unexpected server reply! Status code: {r.status_code}", file=sys.stderr)
         print(r.text, file=sys.stderr)
         sys.exit(-1)
 
